@@ -3,175 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация</title>
+    <title>Клининговые заявки "Мой Не Сам"</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url(image/index.jpg);
+            background-image: url(image/Woman.webp);
             background-repeat: no-repeat;
             background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
+            padding: 20px;
+            height: 100vh;
         }
-        .registration-form {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background-color: rgb(255, 255, 255, 0.9);
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgb(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .registration-form h2 {
-            margin-bottom: 20px;
+        h1, h2 {
+            text-align: center;
         }
-        .registration-form input[type="text"],
-        .registration-form input[type="tel"],
-        .registration-form input[type="email"],
-        .registration-form input[type="password"] {
-            width: 98%;
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input, select {
             padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            margin-top: 5px;
         }
-        .registration-form button {
+        button {
+            margin-top: 15px;
+            padding: 10px;
             background-color: #28a745;
             color: white;
-            padding: 10px;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: auto;
+            border-radius: 5px;
         }
-        .registration-form button:hover {
+        button:hover {
             background-color: #218838;
         }
-        .message {
-            color: red;
-            margin-top: 10px;
+        ul {
+            list-style-type: none;
+            padding: 0;
         }
-        .goodMessage {
-            color: green;
-            margin-top: 10px;
-        }
-        @media (max-width: 390px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            h2 {
-                font-size: 1.25rem; 
-            }
-            button {
-                font-size: 1rem; 
-                padding: 10px;
-            }
-            input {
-                font-size: 1rem; 
-                padding: 10px;
-            }
-            
-        }
-        @media (orientation: landscape) {
-            .registration-form {
-                min-height: auto; 
-                max-height: 60vh; 
-                overflow-y: auto; 
-            }
-            h1 {
-                font-size: 2.5rem; 
-            }
-            h2 {
-                font-size: 2rem; 
-            }
-            button {
-                font-size: 1.2rem; 
-                padding: 12px;
-            }
-            textarea, input {
-                font-size: 1.2rem; 
-                padding: 12px; 
-            }
+        li {
+            background: #e9ecef;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
-<body>
-    <div class="registration-form">
-        <h2>Регистрация</h2>
-        <form action="/index" method="POST" id="registrationForm"></form>
-            <input type="text" name="fullName" placeholder="ФИО" required>
-            <input type="tel" name="phone" placeholder="Номер телефона" required>
-            <input type="email" name="email" placeholder="Электронная почта" required>
-            <input type="text" name="username" placeholder="Логин" required> 
-            <input type="password" name="password" placeholder="Пароль" required>
-            <button type="submit">Зарегистрироваться</button>
-            <p>Или уже есть аккаунт? <a class="Enter" href="Login.ejs">Войти</a></p>
+<body> 
+    <div class="container">
+        <h1>Форма заявки на клининг "Мой Не Сам"</h1>
+        <form id="cleaningForm">
+            <label for="fullName">ФИО:</label>
+            <input type="text" id="fullName" required>
+
+            <label for="address">Адрес:</label>
+            <input type="text" id="address" required>
+
+            <label for="date">Дата:</label>
+            <input type="date" id="date" required>
+
+            <label for="time">Время:</label>
+            <input type="time" id="time" required>
+
+            <label for="pay">Желаемый способ оплаты:</label>
+            <select id="pay" required>
+                <option value="">Выберите способ оплаты</option>
+                <option value="Наличные">Наличные</option>
+                <option value="Банковская карта">Банковская карта</option>
+            </select>
+
+            <label for="services">Услуги:</label>
+            <select id="services" required>
+                <option value="">Выберите услугу</option>
+                <option value="Общий клининг">Общий клининг</option>
+                <option value="Генеральная уборка">Генеральная уборка</option>
+                <option value="Послестроительная уборка">Послестроительная уборка</option>
+                <option value="Химчистка ковров и мебели">Химчистка ковров и мебели</option>
+            </select>
+
+            <button type="submit">Отправить заявку</button>
         </form>
-        <div class="message" id="message"></div>
-        <div class="goodMessage" id="goodMessage"></div>
+
+        <h2>Список заявок</h2>
+        <ul id="requestList"></ul>
     </div>
-    
-    <script>
-        document.getElementById('registrationForm').addEventListener('submit', function(event) {
-            event.preventDefault(); 
-    
-            const fullName = this.fullName.value.trim();
-            const phone = this.phone.value.trim();
-            const email = this.email.value.trim();
-            const username = this.username.value.trim(); 
-            const password = this.password.value;
-    
-            if (localStorage.getItem(username)) {
-                showMessage('Пользователь с таким логином уже зарегистрирован.', 'message');
-                return;
-            }
-    
-            const userData = {
-                fullName,
-                phone,
-                email,
-                username, 
-                password
-            };
-            
-            localStorage.setItem(username, JSON.stringify(userData)); 
-            
-            showMessage('Вы зарегистрированы', 'goodMessage');
-            
-            setTimeout(() => {
-                window.location.href = 'Login.ejs'; 
-            }, 2000);
-            
-            this.reset();
-        });
-    
-        function showMessage(message, elementId) {
-            document.getElementById(elementId).textContent = message;
-            setTimeout(() => {
-                document.getElementById(elementId).textContent = '';
-            }, 3000);
-        }
-        
-        const adminLoginForm = document.getElementById('adminLoginForm');
-        if (adminLoginForm) {
-            adminLoginForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-    
-                const username = this.adminUsername.value;
-                const password = this.adminPassword.value;
-    
-                if (username === 'adminka' && password === 'password') {
-                    window.location.href = 'Admin.html'; 
-            } else {
-                showMessage('Неверный логин или пароль.', 'adminMessage'); 
-            }
+
+<script>
+    function loadRequests() {
+        const requests = JSON.parse(localStorage.getItem('cleaningRequests')) || [];
+        const requestList = document.getElementById('requestList');
+        requestList.innerHTML = ''; 
+        requests.forEach(request => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${request.fullName} - ${request.address} - ${request.date} ${request.time} - ${request.pay} - Услуга: ${request.services}`;
+            requestList.appendChild(listItem);
         });
     }
-</script>       
-     
 
+    window.onload = loadRequests;
+
+    document.getElementById('cleaningForm').addEventListener('submit', function(event) {
+        event.preventDefault(); 
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const services = document.getElementById('services').value;
+        const pay = document.getElementById('pay').value;
+
+        const newRequest = {
+            fullName,
+            address,
+            date,
+            time,
+            services,
+            pay
+        };
+
+        const existingRequests = JSON.parse(localStorage.getItem('cleaningRequests')) || [];
+
+        existingRequests.push(newRequest);
+
+        localStorage.setItem('cleaningRequests', JSON.stringify(existingRequests));
+
+        loadRequests();
+
+        document.getElementById('cleaningForm').reset();
+    });
+</script>
 </body>
 </html>
