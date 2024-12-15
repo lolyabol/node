@@ -130,8 +130,8 @@ app.get('/admin', isAdmin, (req, res) => {
     res.render('admin');
 });
 
-app.get('/index', (req, res) => {
-    res.render('index');
+app.get('/application', (req, res) => {
+    res.render('application');
 });
 
 app.get('/api/requests', (req, res) => {
