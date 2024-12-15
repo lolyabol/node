@@ -100,28 +100,28 @@
 <body> 
     <div class="container">
         <h1>Форма заявки на клининг "Мой Не Сам"</h1>
-        <form id="cleaningForm">
+        <form id="cleaningForm" method="post" action="/admin">
             <label for="fullName">ФИО:</label>
-            <input type="text" id="fullName" required>
+            <input type="text" id="fullName" name="fullName" required>
     
             <label for="address">Адрес:</label>
-            <input type="text" id="address" required>
+            <input type="text" id="address" name="address" required>
     
             <label for="date">Дата:</label>
-            <input type="date" id="date" required>
+            <input type="date" id="date" name="date" required>
     
             <label for="time">Время:</label>
-            <input type="time" id="time" required>
+            <input type="time" id="time" name="time" required>
     
             <label for="pay">Желаемый способ оплаты:</label>
-            <select id="pay" required>
+            <select id="pay" name="pay" required>
                 <option value="">Выберите способ оплаты</option>
                 <option value="Наличные">Наличные</option>
                 <option value="Банковская карта">Банковская карта</option>
             </select>
     
             <label for="services">Услуги:</label>
-            <select id="services" required>
+            <select id="services" name="services" required>
                 <option value="">Выберите услугу</option>
                 <option value="Обычная уборка">Обычная уборка</option>
                 <option value="Мытье окон">Мытье окон</option>
@@ -133,145 +133,101 @@
     
         <h2>Список заявок</h2>
         <ul id="requestList"></ul>
-        
+    
         <h2>Принятые заявки</h2>
         <ul id="acceptedRequestList"></ul>
-        
+    
         <h2>Отклонённые заявки</h2>
         <ul id="rejectedRequestList"></ul>
-        
+    </div>
+    
         <script>
-            function loadRequests() {
-                const requests = JSON.parse(localStorage.getItem('cleaningRequests')) || [];
-                const acceptedRequests = JSON.parse(localStorage.getItem('acceptedRequests')) || [];
-                const rejectedRequests = JSON.parse(localStorage.getItem('rejectedRequests')) || [];
-        
-                const requestList = document.getElementById('requestList');
-                const acceptedRequestList = document.getElementById('acceptedRequestList');
-                const rejectedRequestList = document.getElementById('rejectedRequestList');
-        
-                requestList.innerHTML = ''; 
-                acceptedRequestList.innerHTML = ''; 
-                rejectedRequestList.innerHTML = '';
-        
-                requests.forEach((request, index) => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${request.fullName} - ${request.address} - ${request.date} ${request.time} - ${request.pay} - Услуга: ${request.services}`;
-                    
-                    const acceptButton = document.createElement('button');
-                    acceptButton.textContent = 'Принять';
-                    acceptButton.onclick = () => handleAdminAction(index, 'accept');
-        
-                    const rejectButton = document.createElement('button');
-                    rejectButton.textContent = 'Отклонить';
-                    rejectButton.onclick = () => handleAdminAction(index, 'reject');
-        
-                    listItem.appendChild(acceptButton);
-                    listItem.appendChild(rejectButton);
-                    
-                    requestList.appendChild(listItem);
-                });
-        
-                acceptedRequests.forEach((request) => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${request.fullName} - ${request.address} - ${request.date} ${request.time} - ${request.pay} - Услуга: ${request.services}`;
-                    acceptedRequestList.appendChild(listItem);
-                });
-        
-                rejectedRequests.forEach((request) => { 
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${request.fullName} - ${request.address} - ${request.date} ${request.time} - ${request.pay} - Услуга: ${request.services}`;
-                    rejectedRequestList.appendChild(listItem);
-                });
-            }
-        
-            function handleAdminAction(index, action) {
-                const requests = JSON.parse(localStorage.getItem('cleaningRequests')) || [];
-                
-                if (action === 'accept') {
-                    const acceptedRequests = JSON.parse(localStorage.getItem('acceptedRequests')) || [];
-                    acceptedRequests.push(requests[index]);
-                    localStorage.setItem('acceptedRequests', JSON.stringify(acceptedRequests));
-                    
-                    requests.splice(index, 1);
-                    localStorage.setItem('cleaningRequests', JSON.stringify(requests));
-                } else if (action === 'reject') {
-                    const rejectedRequests = JSON.parse(localStorage.getItem('rejectedRequests')) || []; 
-            
-            rejectedRequests.push(requests[index]);
-            localStorage.setItem('rejectedRequests', JSON.stringify(rejectedRequests));
-            
-            requests.splice(index, 1);
-            localStorage.setItem('cleaningRequests', JSON.stringify(requests));
+           function submitRequest() {
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+    const pay = document.getElementById('pay').value;
+    const services = document.getElementById('services').value;
+
+    const newRequest = {
+        fullName,
+        address,
+        date,
+        time,
+        pay,
+        services
+    };
+
+    fetch('/api/requests', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newRequest)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadRequests();
+            document.getElementById('requestForm').reset(); 
+        } else {
+            console.error(data.message);
+            alert('Ошибка при добавлении заявки: ' + data.message);
         }
-
-        loadRequests();
-    }
-
-    document.getElementById('cleaningForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const fullName = document.getElementById('fullName').value.trim();
-        const address = document.getElementById('address').value.trim();
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-        const pay = document.getElementById('pay').value;
-        const services = document.getElementById('services').value;
-
-        const newRequest = {
-            fullName,
-            address,
-            date,
-            time,
-            pay,
-            services
-        };
-
-        const existingRequests = JSON.parse(localStorage.getItem('cleaningRequests')) || [];
-        
-        existingRequests.push(newRequest);
-
-        localStorage.setItem('cleaningRequests', JSON.stringify(existingRequests));
-
-        loadRequests();
-
-        this.reset(); 
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при связи с сервером.');
     });
+}
 
-    window.onload = loadRequests; 
-        
+function loadRequests() {
 
-    document.getElementById('cleaningForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+    fetch('/api/requests')
+        .then(response => response.json())
+        .then(data => {
+            const requestsTableBody = document.getElementById('requests-table-body');
+            requestsTableBody.innerHTML = ''; 
 
-        const fullName = document.getElementById('fullName').value.trim();
-        const address = document.getElementById('address').value.trim();
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-        const pay = document.getElementById('pay').value;
-        const services = document.getElementById('services').value;
+            data.requests.forEach(request => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${request.id}</td>
+                    <td>${request.fullName}</td>
+                    <td>${request.address}</td>
+                    <td>${request.date}</td>
+                    <td>${request.time}</td>
+                    <td>${request.services}</td>
+                    <td>${request.pay}</td>
+                    <td>${request.status || 'Ожидает'}</td>
+                    <td>
+                        ${!request.status ?
+                            `<form action="/api/requests/${request.id}/accept" method="POST" style="display:inline;">
+                                <button type="submit">Принять</button>
+                            </form>
+                            <form action="/api/requests/${request.id}/reject" method="POST" style="display:inline;">
+                                <button type="submit">Отклонить</button>
+                            </form>` : ''}
+                    </td>`;
+                
+                requestsTableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось загрузить заявки с сервера.');
+        });
+}
 
-        const newRequest = {
-            fullName,
-            address,
-            date,
-            time,
-            pay,
-            services
-        };
+document.getElementById('requestForm').onsubmit = function (event) {
+    event.preventDefault(); 
+    submitRequest(); 
+};
 
-        const existingRequests = JSON.parse(localStorage.getItem('cleaningRequests')) || [];
-        
-        existingRequests.push(newRequest);
+window.onload = loadRequests;
 
-        localStorage.setItem('cleaningRequests', JSON.stringify(existingRequests));
-
-        loadRequests();
-
-        this.reset(); 
-    });
-
-    window.onload = loadRequests; 
 </script>
     
 </body>

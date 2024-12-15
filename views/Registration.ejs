@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url(image/index.jpg);
+            background-image: url(https://p2.zoon.ru/preview/nQeYIEa8TbmH3kes5Eh0Mw/2400x1500x75/1/8/7/original_5c131802c2022103107510e1_5eed9b35d7df6.jpg);
             background-repeat: no-repeat;
             background-size: cover;
             display: flex;
@@ -101,77 +101,62 @@
 <body>
     <div class="registration-form">
         <h2>Регистрация</h2>
-        <form action="/index" method="POST" id="registrationForm"></form>
-            <input type="text" name="fullName" placeholder="ФИО" required>
-            <input type="tel" name="phone" placeholder="Номер телефона" required>
-            <input type="email" name="email" placeholder="Электронная почта" required>
-            <input type="text" name="username" placeholder="Логин" required> 
-            <input type="password" name="password" placeholder="Пароль" required>
+        <form action="/registration" method="POST">
+            <label for="username">Имя пользователя:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+            
             <button type="submit">Зарегистрироваться</button>
-            <p>Или уже есть аккаунт? <a class="Enter" href="Login.ejs">Войти</a></p>
+            <p>Есть аккаунт? <a href="/login">Войти</a></p>
+            
+            <div class="message" id="error-message"></div>
+            <div class="goodMessage" id="success-message"></div>
         </form>
-        <div class="message" id="message"></div>
-        <div class="goodMessage" id="goodMessage"></div>
     </div>
-    
     <script>
-        document.getElementById('registrationForm').addEventListener('submit', function(event) {
-            event.preventDefault(); 
-    
-            const fullName = this.fullName.value.trim();
-            const phone = this.phone.value.trim();
-            const email = this.email.value.trim();
-            const username = this.username.value.trim(); 
-            const password = this.password.value;
-    
-            if (localStorage.getItem(username)) {
-                showMessage('Пользователь с таким логином уже зарегистрирован.', 'message');
-                return;
-            }
-    
-            const userData = {
-                fullName,
-                phone,
-                email,
-                username, 
-                password
-            };
-            
-            localStorage.setItem(username, JSON.stringify(userData)); 
-            
-            showMessage('Вы зарегистрированы', 'goodMessage');
-            
-            setTimeout(() => {
-                window.location.href = 'Login.ejs'; 
-            }, 2000);
-            
-            this.reset();
-        });
-    
-        function showMessage(message, elementId) {
-            document.getElementById(elementId).textContent = message;
-            setTimeout(() => {
-                document.getElementById(elementId).textContent = '';
-            }, 3000);
-        }
-        
-        const adminLoginForm = document.getElementById('adminLoginForm');
-        if (adminLoginForm) {
-            adminLoginForm.addEventListener('submit', function(event) {
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('registrationForm').addEventListener('submit', function(event) {
                 event.preventDefault();
-    
-                const username = this.adminUsername.value;
-                const password = this.adminPassword.value;
-    
-                if (username === 'adminka' && password === 'password') {
-                    window.location.href = 'Admin.html'; 
-            } else {
-                showMessage('Неверный логин или пароль.', 'adminMessage'); 
-            }
-        });
-    }
-</script>       
-     
 
+                let username = event.target.elements.username.value.trim();
+                let email = event.target.elements.email.value.trim();
+                let password = event.target.elements.password.value.trim();
+
+                if (!username || !email || !password) {
+                    showMessage('Пожалуйста, заполните все поля.', false);
+                    return; 
+                }
+
+                fetch('/registration', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: username=`${encodeURIComponent(username)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Регистрация успешна!', true);
+                        window.location.href = '/Login';
+                    } else {
+                        showMessage(data.message);
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+            });
+        });
+
+        function showMessage(message, isSuccess) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = isSuccess ? 'goodMessage' : 'message';
+        }
+    </script>
 </body>
 </html>
